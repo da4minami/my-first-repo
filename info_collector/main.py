@@ -150,14 +150,14 @@ def collect_instagram(keywords: list[str], seen_ids: list[str], config: dict, lo
         quiet=True,
     )
 
+    session_id = os.getenv("INSTAGRAM_SESSION_ID")
     ig_user = os.getenv("INSTAGRAM_USERNAME")
-    ig_pass = os.getenv("INSTAGRAM_PASSWORD")
-    if ig_user and ig_pass:
-        try:
-            loader.login(ig_user, ig_pass)
-            logger.info("[Instagram] ログイン成功")
-        except Exception as e:
-            logger.warning(f"[Instagram] ログイン失敗（ログインなしで継続）: {e}")
+    if session_id and ig_user:
+        loader.context._session.cookies.set("sessionid", session_id, domain=".instagram.com")
+        loader.context.username = ig_user
+        logger.info(f"[Instagram] セッションIDでログイン: @{ig_user}")
+    else:
+        logger.warning("[Instagram] INSTAGRAM_SESSION_ID または INSTAGRAM_USERNAME が未設定です")
 
     new_posts = []
 

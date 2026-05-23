@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Instagram ハッシュタグ検索テスト
-X APIキー不要。ログインなしでも動作します（ログインすると安定します）
+ブラウザのセッションIDを使ってログインします
 """
 
 import os
@@ -32,16 +32,16 @@ def main():
         quiet=True,
     )
 
+    session_id = os.getenv("INSTAGRAM_SESSION_ID")
     ig_user = os.getenv("INSTAGRAM_USERNAME")
-    ig_pass = os.getenv("INSTAGRAM_PASSWORD")
-    if ig_user and ig_pass:
-        try:
-            loader.login(ig_user, ig_pass)
-            print(f"ログイン成功: @{ig_user}\n")
-        except Exception as e:
-            print(f"ログイン失敗（ログインなしで継続）: {e}\n")
+
+    if session_id and ig_user:
+        loader.context._session.cookies.set("sessionid", session_id, domain=".instagram.com")
+        loader.context.username = ig_user
+        print(f"セッションIDでログイン: @{ig_user}\n")
     else:
-        print("ログインなしで実行（.env に INSTAGRAM_USERNAME / INSTAGRAM_PASSWORD を設定するとより安定します）\n")
+        print("エラー: .env に INSTAGRAM_SESSION_ID と INSTAGRAM_USERNAME を設定してください\n")
+        return
 
     for keyword in KEYWORDS:
         hashtag = keyword.replace(" ", "").replace("　", "")
