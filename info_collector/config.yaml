@@ -24,8 +24,7 @@ platforms:
     max_posts_per_keyword: 5
 
   facebook:
-    # Facebookは公式APIでのキーワード検索に高い権限が必要なため無効
-    # 代替: Facebookページの公開RSS (pages_to_rss.py 参照) を使用してください
+    # Facebookは関連ページを直接フォローして手動で確認する
     enabled: false
 
 # 監視間隔（分）

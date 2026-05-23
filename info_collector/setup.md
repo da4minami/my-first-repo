@@ -74,15 +74,16 @@ python main.py
 
 ---
 
-## Facebookについて
+## Facebook（手動フォロー）
 
-Facebookの公式APIは2023年以降、キーワード検索に高度な権限（`public_content` 等）が必要で、  
-通常の個人アプリでは利用できません。
+Facebookは関連ページ・グループを直接フォローして確認します。自動収集の対象外です。
 
-**代替手段:**
-- 松本市やまちづくり関連の公式Facebookページを「ページをフォロー」してRSSで受け取る
-  - 一部のFacebookページはRSSに対応しています: `https://www.facebook.com/feeds/page.php?id=PAGE_ID&format=rss20`
-- FacebookグループはRSSが廃止されているため、手動チェックが現実的です
+フォロー推奨の検索キーワード（Facebook内で検索）:
+- 松本まちづくり
+- 三の丸エリア
+- 松本城三の丸
+
+フォロー後はFacebookのホームフィードまたは「お気に入り」に登録しておくと見逃しを防げます。
 
 ---
 
