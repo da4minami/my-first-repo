@@ -1,0 +1,46 @@
+# 情報収集設定ファイル
+# .env ファイルにAPIキーを設定してください
+
+keywords:
+  - 松本
+  - 誰かに語りたくなる暮らし
+  - 三の丸エリアプラットフォーム
+  - 松本城三の丸エリアビジョン
+  - 三の丸サポーター
+  - 松本まちづくり
+
+platforms:
+  twitter:
+    enabled: true
+    # X無料プランは15分に1回のみ検索可能。Basic($100/月)以上で緩和される
+    max_results_per_keyword: 10
+    # 検索対象: recent (7日以内) のみ無料プランで利用可能
+    exclude_retweets: true
+
+  instagram:
+    enabled: true
+    # ハッシュタグ検索（公開投稿のみ）
+    # ログイン情報が設定されている場合はより安定して動作します
+    max_posts_per_keyword: 5
+
+  facebook:
+    # Facebookは公式APIでのキーワード検索に高い権限が必要なため無効
+    # 代替: Facebookページの公開RSS (pages_to_rss.py 参照) を使用してください
+    enabled: false
+
+# 監視間隔（分）
+# X無料プランの制限上、最短15分を推奨
+check_interval_minutes: 60
+
+notification:
+  email:
+    to: ""  # 送信先メールアドレス（または .env の NOTIFY_EMAIL に設定）
+    subject_prefix: "[松本情報収集] "
+    # true: まとめて送信 / false: 新着があれば即時送信
+    batch: true
+
+# 収集済みIDを保存するファイル（重複通知防止）
+state_file: seen_posts.json
+
+# ログ設定
+log_file: collector.log

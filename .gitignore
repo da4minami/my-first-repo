@@ -1,0 +1,8 @@
+.env
+seen_posts.json
+collector.log
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
