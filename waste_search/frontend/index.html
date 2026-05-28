@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>産業廃棄物行政 事例検索システム（長野県）</title>
+  <style>
+    :root {
+      --primary: #1a5276;
+      --primary-light: #2e86c1;
+      --accent: #117a65;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --muted: #7f8c8d;
+      --border: #d5dbdb;
+      --user-bubble: #eaf4fb;
+      --ai-bubble: #f9f9f9;
+      --source-bg: #eafaf1;
+      --clarify-bg: #fef9e7;
+      --clarify-border: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    header .icon { font-size: 28px; }
+
+    header .title-block h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    header .title-block p {
+      font-size: 0.78rem;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* チャットパネル */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--primary-light);
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 400px;
+      max-height: 520px;
+    }
+
+    .message { display: flex; gap: 10px; align-items: flex-start; }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .message.user .avatar { background: var(--primary); color: #fff; }
+    .message.ai .avatar { background: var(--accent); color: #fff; }
+
+    .bubble {
+      max-width: 78%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .message.user .bubble {
+      background: var(--user-bubble);
+      border-top-right-radius: 3px;
+    }
+
+    .message.ai .bubble {
+      background: var(--ai-bubble);
+      border: 1px solid var(--border);
+      border-top-left-radius: 3px;
+    }
+
+    /* 確認事項カード */
+    .clarify-card {
+      background: var(--clarify-bg);
+      border: 1px solid var(--clarify-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      max-width: 78%;
+    }
+
+    .clarify-card .clarify-title {
+      font-weight: 700;
+      color: #c0392b;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .clarify-card ul {
+      padding-left: 18px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #6e2f0a;
+    }
+
+    /* ソースパネル */
+    .sources-panel {
+      width: 300px;
+      flex-shrink: 0;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sources-header {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .sources-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .source-item {
+      background: var(--source-bg);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .source-item .source-cat {
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .source-item .source-label { color: var(--text); }
+
+    .source-item .source-rel {
+      color: var(--muted);
+      font-size: 0.72rem;
+      margin-top: 2px;
+    }
+
+    .sources-empty {
+      padding: 20px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* 入力エリア */
+    .input-area {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    textarea {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 72px;
+      max-height: 160px;
+      transition: border 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-light);
+    }
+
+    button.send-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    button.send-btn:hover { background: var(--primary-light); }
+    button.send-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+    button.reset-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    button.reset-btn:hover { border-color: #c0392b; color: #c0392b; }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ローディング */
+    .loading-dots { display: inline-flex; gap: 4px; }
+    .loading-dots span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: bounce 1.2s infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* サンプル質問 */
+    .sample-questions {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: #f8f8f8;
+    }
+
+    .sample-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .sample-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      background: #eaf4fb;
+      border: 1px solid #aed6f1;
+      border-radius: 16px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .chip:hover { background: #d6eaf8; }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      .container { flex-direction: column; padding: 12px; }
+      .sources-panel { width: 100%; }
+      .messages { max-height: 350px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="icon">♻️</div>
+    <div class="title-block">
+      <h1>産業廃棄物行政 事例検索システム</h1>
+      <p>法律・政令・省令・国通知・条例・県通知・判例に基づく回答（長野県対応）</p>
+    </div>
+    <span class="badge">ハルシネーション排除</span>
+  </header>
+
+  <div class="container">
+    <!-- チャットパネル -->
+    <div class="chat-panel">
+      <div class="chat-header">💬 質問・回答</div>
+      <div class="messages" id="messages">
+        <div class="message ai">
+          <div class="avatar">🤖</div>
+          <div class="bubble">産業廃棄物行政に関する事例検索システムへようこそ。<br><br>廃棄物処理法・施行令・施行規則・環境省通知・長野県条例・長野県通知・判例をもとに、正確な情報をご提供します。<br><br>ご質問をお入力ください。回答に曖昧さがある場合は、論点を整理して確認事項をご提示します。</div>
+        </div>
+      </div>
+
+      <div class="sample-questions">
+        <div class="sample-title">よくある質問例（クリックで入力）</div>
+        <div class="sample-chips">
+          <span class="chip" onclick="setQuestion('産業廃棄物の定義を教えてください')">産業廃棄物の定義</span>
+          <span class="chip" onclick="setQuestion('マニフェストの返送期限はいつまでですか？')">マニフェスト返送期限</span>
+          <span class="chip" onclick="setQuestion('収集運搬業の許可申請に必要な書類は何ですか？')">許可申請書類</span>
+          <span class="chip" onclick="setQuestion('委託契約書は何年間保存する必要がありますか？')">委託契約書保存期間</span>
+          <span class="chip" onclick="setQuestion('不法投棄をした場合の罰則を教えてください')">不法投棄の罰則</span>
+          <span class="chip" onclick="setQuestion('長野県の産業廃棄物収集運搬業の許可更新手続きを教えてください')">長野県 許可更新</span>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-row">
+          <textarea id="question" placeholder="廃棄物処理法に関するご質問を入力してください…&#10;例：汚泥の保管基準を教えてください" rows="3"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">送信</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="hint">※ 回答は参照法令文書に基づきます。参照外の内容は「記載なし」と表示します。</span>
+          <button class="reset-btn" onclick="resetConversation()">会話をリセット</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ソースパネル -->
+    <div class="sources-panel">
+      <div class="sources-header">📚 参照法令・通知・判例</div>
+      <div class="sources-list" id="sourcesList">
+        <div class="sources-empty">質問すると参照した法令等がここに表示されます</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>本システムの回答は参照文書の範囲に限定されます。個別事案の最終判断は管轄する都道府県・市区町村にご確認ください。</footer>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let conversationHistory = [];
+
+    function setQuestion(text) {
+      document.getElementById("question").value = text;
+      document.getElementById("question").focus();
+    }
+
+    function resetConversation() {
+      conversationHistory = [];
+      document.getElementById("messages").innerHTML = `
+        <div class="message ai">
+          <div class="avatar">🤖</div>
+          <div class="bubble">会話をリセットしました。新しいご質問をお入力ください。</div>
+        </div>`;
+      document.getElementById("sourcesList").innerHTML = '<div class="sources-empty">質問すると参照した法令等がここに表示されます</div>';
+    }
+
+    function appendMessage(role, content, isClarify = false, questions = []) {
+      const container = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = `message ${role}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = role === "user" ? "👤" : "🤖";
+
+      if (isClarify && questions.length > 0) {
+        const card = document.createElement("div");
+        card.className = "clarify-card";
+        const title = document.createElement("div");
+        title.className = "clarify-title";
+        title.textContent = "⚠️ 回答のために以下の点をご確認ください";
+        card.appendChild(title);
+        const ul = document.createElement("ul");
+        questions.forEach(q => {
+          const li = document.createElement("li");
+          li.textContent = q;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+        const note = document.createElement("div");
+        note.style.cssText = "margin-top:8px;font-size:0.78rem;color:#7f8c8d;";
+        note.textContent = "上記の点を含めて、もう少し詳しく質問を入力してください。";
+        card.appendChild(note);
+        div.appendChild(avatar);
+        div.appendChild(card);
+      } else {
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = content;
+        div.appendChild(avatar);
+        div.appendChild(bubble);
+      }
+
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function showLoading() {
+      const container = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = "message ai";
+      div.id = "loading-msg";
+      div.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="loading-dots"><span></span><span></span><span></span></div> 法令を参照しています...</div>`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeLoading() {
+      const el = document.getElementById("loading-msg");
+      if (el) el.remove();
+    }
+
+    function updateSources(sources) {
+      const list = document.getElementById("sourcesList");
+      if (!sources || sources.length === 0) {
+        list.innerHTML = '<div class="sources-empty">参照文書が見つかりませんでした</div>';
+        return;
+      }
+      list.innerHTML = "";
+      sources.forEach(s => {
+        const item = document.createElement("div");
+        item.className = "source-item";
+        item.innerHTML = `
+          <div class="source-cat">${escapeHtml(s.category || "")}</div>
+          <div class="source-label">${escapeHtml(s.label || "")}</div>
+          ${s.relevance != null ? `<div class="source-rel">関連度: ${Math.round(s.relevance * 100)}%</div>` : ""}
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function sendMessage() {
+      const textarea = document.getElementById("question");
+      const sendBtn = document.getElementById("sendBtn");
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      appendMessage("user", text);
+      conversationHistory.push({ role: "user", content: text });
+      textarea.value = "";
+      sendBtn.disabled = true;
+      showLoading();
+
+      try {
+        const res = await fetch(`${API_BASE}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: text,
+            history: conversationHistory.slice(0, -1),
+          }),
+        });
+
+        const data = await res.json();
+        removeLoading();
+
+        if (data.needs_clarification && data.clarification_questions?.length > 0) {
+          appendMessage("ai", "", true, data.clarification_questions);
+          // 確認事項は会話履歴に追加（システム側の質問として）
+          const clarifyText = "確認事項:\n" + data.clarification_questions.map((q, i) => `${i+1}. ${q}`).join("\n");
+          conversationHistory.push({ role: "assistant", content: clarifyText });
+        } else if (data.answer) {
+          appendMessage("ai", data.answer);
+          conversationHistory.push({ role: "assistant", content: data.answer });
+        }
+
+        if (data.sources) {
+          updateSources(data.sources);
+        }
+      } catch (err) {
+        removeLoading();
+        appendMessage("ai", "エラーが発生しました。サーバーへの接続を確認してください。");
+        console.error(err);
+      } finally {
+        sendBtn.disabled = false;
+        textarea.focus();
+      }
+    }
+
+    // Ctrl+Enter で送信
+    document.getElementById("question").addEventListener("keydown", function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
